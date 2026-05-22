@@ -1,0 +1,15 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 252 226">
+
+  <!-- BLUE: left block -->
+  <rect x="22.5" y="21.5" width="131" height="183" fill="#024D8C"/>
+
+  <!-- RED: right block, shares exact edge with blue -->
+  <rect x="153.5" y="21.5" width="76" height="183" fill="#F2424A"/>
+
+  <!-- WHITE square cutout -->
+  <rect x="77.5" y="65.5" width="97" height="93" fill="#FFFFFF"/>
+
+  <!-- LIGHT BLUE inner rectangle -->
+  <rect x="77.5" y="89.5" width="77" height="45" fill="#F3F7FA"/>
+
+</svg>

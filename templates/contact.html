@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Contact — Edu Plot to Policy{% endblock %}
+
+{% block content %}
+<div class="accent-strip"></div>
+
+<div class="section">
+  <div class="contact-layout">
+
+    <div class="contact-info">
+      <span class="section-label">Get In Touch</span>
+      <h2>Let's turn your<br/>data into <em>action</em></h2>
+      <p>Have a district challenge in mind? We'd love to hear about it. Tell us what you're working with and we'll respond within 48 hours with a path forward.</p>
+
+      <div class="contact-details">
+        <div class="contact-detail">
+          <div class="contact-detail-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#024D8C" stroke-width="1.5">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <span>justinmehr2010@gmail.com</span>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#024D8C" stroke-width="1.5">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012.18 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.15a16 16 0 006.29 6.29l1.42-1.42a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+            </svg>
+          </div>
+          <span>+1 (573) 864-8219</span>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#024D8C" stroke-width="1.5">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <span>Serving K-12 districts nationwide</span>
+        </div>
+      </div>
+    </div>
+
+    <form class="contact-form" action="/contact" method="POST">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Full Name *</label>
+          <input type="text" id="name" name="name" placeholder="Dr. Jane Smith" required/>
+        </div>
+        <div class="form-group">
+          <label for="organization">District / Organization</label>
+          <input type="text" id="organization" name="organization" placeholder="Springfield ISD"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input type="email" id="email" name="email" placeholder="jane@springfieldisd.org" required/>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="phone" placeholder="+1 000 000 0000"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="service">I'm interested in…</label>
+        <select id="service" name="service">
+          <option value="">Select a service</option>
+          <option>Data Visualization Tools</option>
+          <option>Custom Reporting Systems</option>
+          <option>Coaching &amp; Capacity Building</option>
+          <option>Research &amp; Policy Analysis</option>
+          <option>Not sure — let's talk</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="message">Tell us about your challenge *</label>
+        <textarea id="message" name="message" placeholder="What data challenge is your district facing? What decisions are you trying to support? Any relevant context on size, timeline, or existing systems…" required></textarea>
+      </div>
+
+      <button type="submit" class="form-submit">Send Message →</button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
