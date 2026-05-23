@@ -142,9 +142,10 @@ body {
 }
 .hamburger span {
   display: block;
-  width: 22px; height: 1.5px;
-  background: var(--dark);
+  width: 22px; height: 2px;
+  background: var(--blue);
   transition: all 0.3s;
+  border-radius: 6px;
 }
 
 /* ── Mobile Menu ───────────────────────────────────────────── */
