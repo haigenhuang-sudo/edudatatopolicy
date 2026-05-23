@@ -1,0 +1,788 @@
+{% extends "base.html" %}
+{% block title %}Early Warning System — Edu Data to Policy{% endblock %}
+
+{% block content %}
+<div class="accent-strip"></div>
+<div class="section">
+
+<style>
+/* ── EWI Page ── */
+.ewi-header { margin-bottom: 32px; }
+
+/* ── Summary cards ── */
+.ewi-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.ewi-summary-card {
+  border-radius: 6px;
+  padding: 28px 24px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+.ewi-summary-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.ewi-summary-card.active { border-color: currentColor; }
+.ewi-card-high  { background: #fce0e1; color: #1a1a1a; }
+.ewi-card-mod   { background: #fef2f2; color: #1a1a1a; }
+.ewi-card-low   { background: #b3cde8; color: #1a1a1a; }
+.ewi-card-count { font-size: 52px; font-weight: 300; line-height: 1; margin-bottom: 6px; }
+.ewi-card-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; }
+.ewi-card-desc  { font-size: 12px; margin-top: 8px; opacity: 0.65; }
+.ewi-card-bar   { position: absolute; bottom: 0; left: 0; height: 4px; width: 100%; }
+.ewi-card-high .ewi-card-bar  { background: #F2424A; }
+.ewi-card-mod  .ewi-card-bar  { background: #f7a0a4; }
+.ewi-card-low  .ewi-card-bar  { background: #024D8C; }
+
+/* ── Filter bar ── */
+.ewi-filter-bar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.ewi-search {
+  flex: 1; min-width: 200px;
+  padding: 9px 14px;
+  border: 1px solid #d6d6d6; border-radius: 6px;
+  font-family: 'Roboto', sans-serif; font-size: 13px;
+  color: #1a1a1a; outline: none;
+  transition: border-color 0.2s;
+}
+.ewi-search:focus { border-color: #024D8C; }
+.ewi-filter-btn {
+  padding: 8px 16px; border-radius: 6px;
+  border: 1px solid #d6d6d6; background: #fff;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  font-family: 'Roboto', sans-serif; color: #1a1a1a;
+  transition: all 0.15s;
+}
+.ewi-filter-btn:hover { background: #f3f7fa; }
+.ewi-filter-btn.active-high  { background: #fce0e1; border-color: #F2424A; color: #1a1a1a; }
+.ewi-filter-btn.active-mod   { background: #fef2f2; border-color: #f7a0a4; color: #1a1a1a; }
+.ewi-filter-btn.active-low   { background: #b3cde8; border-color: #024D8C; color: #1a1a1a; }
+.ewi-filter-btn.active-all   { background: #f3f7fa; border-color: #024D8C; color: #024D8C; }
+
+/* ── Student table ── */
+.ewi-table-card {
+  background: #fff; border-radius: 6px;
+  border: 1px solid #d6d6d6; overflow: hidden;
+  margin-bottom: 20px;
+}
+.ewi-table-wrap { overflow-x: auto; max-height: 520px; overflow-y: auto; }
+.ewi-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; font-family: 'Roboto', sans-serif;
+}
+.ewi-table thead th {
+  padding: 10px 16px; font-size: 11px; font-weight: 700;
+  color: #1a1a1a; text-transform: uppercase;
+  letter-spacing: 0.05em; white-space: nowrap;
+  border-bottom: 2px solid #024D8C;
+  background: #f3f7fa; position: sticky; top: 0; z-index: 2;
+  cursor: pointer; user-select: none;
+}
+.ewi-table thead th:hover { color: #024D8C; }
+.ewi-table thead th.sorted-asc::after  { content: " ↑"; color: #024D8C; }
+.ewi-table thead th.sorted-desc::after { content: " ↓"; color: #024D8C; }
+.ewi-table tbody tr {
+  border-bottom: 1px solid #f0f0f0; cursor: pointer;
+  transition: background 0.1s;
+}
+.ewi-table tbody tr:hover { background: #f3f7fa; }
+.ewi-table tbody tr:last-child { border-bottom: none; }
+.ewi-table td { padding: 10px 16px; color: #1a1a1a; vertical-align: middle; }
+
+/* ── Risk badge ── */
+.risk-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.rb-high { background: #fce0e1; color: #1a1a1a; }
+.rb-mod  { background: #fef2f2; color: #1a1a1a; }
+.rb-low  { background: #b3cde8; color: #1a1a1a; }
+.rb-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.rb-high .rb-dot { background: #F2424A; }
+.rb-mod  .rb-dot { background: #f7a0a4; }
+.rb-low  .rb-dot { background: #024D8C; }
+
+/* ── Score bar ── */
+.score-mini {
+  display: flex; align-items: center; gap: 8px;
+}
+.score-mini-bar {
+  width: 60px; height: 6px; border-radius: 3px;
+  background: #ebebeb; overflow: hidden; flex-shrink: 0;
+}
+.score-mini-fill { height: 100%; border-radius: 3px; }
+
+/* ── Student Profile Modal ── */
+.ewi-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+  align-items: flex-start; justify-content: center;
+  padding: 32px 16px; overflow-y: auto;
+}
+.ewi-modal-overlay.open { display: flex; }
+.ewi-modal {
+  background: #fff; border-radius: 8px;
+  width: 100%; max-width: 780px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+  flex-shrink: 0;
+}
+
+/* ── Profile header ── */
+.ewi-profile-hdr {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 12px;
+  padding: 24px 28px 20px; flex-wrap: wrap;
+  border-bottom: 1px solid #f0f0f0;
+}
+.ewi-profile-name { font-size: 20px; font-weight: 500; color: #1a1a1a; }
+.ewi-profile-sub  { font-size: 12px; color: #6b6b6b; margin-top: 4px; }
+.ewi-close-btn {
+  background: transparent; border: none;
+  font-size: 22px; cursor: pointer; color: #6b6b6b;
+  padding: 4px; line-height: 1; flex-shrink: 0;
+}
+
+/* ── Profile metric grid ── */
+.ewi-metric-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.ewi-metric {
+  background: #fff; padding: 16px 20px; text-align: center;
+}
+.ewi-metric-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #6b6b6b; margin-bottom: 6px; }
+.ewi-metric-val   { font-size: 26px; font-weight: 300; color: #1a1a1a; line-height: 1; }
+.ewi-metric-pill  { margin-top: 6px; }
+
+/* ── Profile body ── */
+.ewi-profile-body { padding: 24px 28px; }
+
+/* ── Radar + domain cards ── */
+.ewi-domains {
+  display: grid; grid-template-columns: 200px 1fr;
+  gap: 20px; margin-bottom: 24px; align-items: start;
+}
+.ewi-radar-wrap { height: 200px; position: relative; }
+
+.ewi-domain-cards { display: flex; flex-direction: column; gap: 8px; }
+.ewi-domain-card {
+  background: #f9fafb; border-radius: 6px;
+  padding: 12px 16px; border: 1px solid #e8e8e8;
+}
+.ewi-domain-hdr {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 8px;
+}
+.ewi-domain-name { font-size: 12px; font-weight: 600; color: #1a1a1a; }
+
+/* ── Indicator rows ── */
+.ewi-ind-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.ewi-ind-row:last-of-type { border-bottom: none; }
+.ewi-ind-lbl { font-size: 11px; color: #6b6b6b; min-width: 150px; flex-shrink: 0; }
+.ewi-ind-val { font-size: 11px; font-weight: 500; min-width: 40px; text-align: right; flex-shrink: 0; }
+.ewi-bar-bg  { flex: 1; height: 6px; border-radius: 3px; background: #ebebeb; overflow: hidden; min-width: 0; }
+.ewi-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+
+/* ── Flag chips ── */
+.ewi-flag {
+  font-size: 10px; padding: 2px 7px;
+  border-radius: 5px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+}
+.fh { background: #fce0e1; color: #1a1a1a; }
+.fm { background: #fef2f2; color: #1a1a1a; }
+.fl { background: #b3cde8; color: #1a1a1a; }
+.fi { background: #024D8C; color: #ffffff; }
+
+/* ── Test scores grid ── */
+.ewi-test-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0;
+}
+.ewi-test-cell {
+  background: #f9fafb; border-radius: 6px; padding: 12px 14px;
+  border: 1px solid #e8e8e8;
+}
+.ewi-test-label { font-size: 10px; font-weight: 600; color: #6b6b6b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.ewi-test-score { font-size: 22px; font-weight: 300; color: #1a1a1a; margin-bottom: 4px; }
+.ewi-score-row  { display: flex; align-items: center; gap: 8px; }
+.ewi-pct-lbl    { font-size: 10px; color: #6b6b6b; white-space: nowrap; }
+
+/* ── History chart ── */
+.ewi-hist-wrap { height: 150px; position: relative; margin-top: 16px; }
+
+/* ── Alerts ── */
+.ewi-alert {
+  border-radius: 6px; padding: 10px 14px;
+  font-size: 12px; margin-bottom: 6px;
+  display: flex; align-items: flex-start; gap: 8px; line-height: 1.55;
+}
+.ewi-alert svg { flex-shrink: 0; margin-top: 1px; }
+.ewi-alert-high { background: #fce0e1; border: 1px solid #f7a0a4; color: #1a1a1a; }
+.ewi-alert-mod  { background: #fef2f2; border: 1px solid #f7a0a4; color: #1a1a1a; }
+.ewi-alert-low  { background: #b3cde8; border: 1px solid #4a86c8; color: #1a1a1a; }
+
+/* ── Empty state ── */
+.ewi-empty {
+  text-align: center; padding: 48px 20px;
+  color: #6b6b6b; font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .ewi-summary { grid-template-columns: 1fr; }
+  .ewi-metric-grid { grid-template-columns: 1fr 1fr; }
+  .ewi-domains { grid-template-columns: 1fr; }
+  .ewi-radar-wrap { height: 180px; }
+  .ewi-test-grid { grid-template-columns: 1fr; }
+  .ewi-ind-lbl { min-width: 110px; }
+}
+</style>
+
+<!-- Student profile modal -->
+<div class="ewi-modal-overlay" id="ewi-modal">
+  <div class="ewi-modal" id="ewi-modal-inner">
+    <div class="ewi-profile-hdr">
+      <div>
+        <div class="ewi-profile-name" id="prof-name">—</div>
+        <div class="ewi-profile-sub" id="prof-sub">—</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="prof-pill"></div>
+        <button class="ewi-close-btn" onclick="closeProfile()">×</button>
+      </div>
+    </div>
+
+    <!-- Metric strip -->
+    <div class="ewi-metric-grid">
+      <div class="ewi-metric">
+        <div class="ewi-metric-label">Composite</div>
+        <div class="ewi-metric-val" id="prof-score">—</div>
+        <div class="ewi-metric-pill"><span style="font-size:10px;color:#6b6b6b;">out of 100</span></div>
+      </div>
+      <div class="ewi-metric">
+        <div class="ewi-metric-label">Attendance</div>
+        <div class="ewi-metric-val" id="prof-att">—</div>
+        <div class="ewi-metric-pill" id="prof-att-pill"></div>
+      </div>
+      <div class="ewi-metric">
+        <div class="ewi-metric-label">Behavior</div>
+        <div class="ewi-metric-val" id="prof-beh">—</div>
+        <div class="ewi-metric-pill" id="prof-beh-pill"></div>
+      </div>
+      <div class="ewi-metric">
+        <div class="ewi-metric-label">GPA</div>
+        <div class="ewi-metric-val" id="prof-gpa">—</div>
+        <div class="ewi-metric-pill" id="prof-gpa-pill"></div>
+      </div>
+    </div>
+
+    <div class="ewi-profile-body">
+      <!-- Radar + domains -->
+      <div class="ewi-domains">
+        <div>
+          <div class="ewi-radar-wrap">
+            <canvas id="prof-radar"></canvas>
+          </div>
+        </div>
+        <div class="ewi-domain-cards" id="prof-domains"></div>
+      </div>
+
+      <!-- Test scores -->
+      <div id="prof-tests-section">
+        <div style="font-size:12px;font-weight:600;color:#6b6b6b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Standardized Test Scores</div>
+        <div class="ewi-test-grid" id="prof-tests"></div>
+      </div>
+
+      <!-- Score history -->
+      <div id="prof-hist-section" style="margin-top:20px;">
+        <div style="font-size:12px;font-weight:600;color:#6b6b6b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Score History — ELA vs Math</div>
+        <div class="ewi-hist-wrap"><canvas id="prof-hist"></canvas></div>
+        <div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:#6b6b6b;">
+          <span><span style="display:inline-block;width:16px;height:2px;background:#024D8C;vertical-align:middle;margin-right:4px;"></span>ELA</span>
+          <span><span style="display:inline-block;width:16px;height:2px;background:#22c55e;border-top:2px dashed #22c55e;vertical-align:middle;margin-right:4px;"></span>Math</span>
+          <span><span style="display:inline-block;width:16px;height:2px;border-top:2px dashed #ef4444;vertical-align:middle;margin-right:4px;"></span>Proficiency (297)</span>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div id="prof-alerts" style="margin-top:20px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Page header -->
+<div class="ewi-header">
+  <span class="section-label">Our Work</span>
+  <h2 style="font-size:clamp(24px,3vw,36px);font-weight:300;color:var(--dark);letter-spacing:-0.01em;">
+    Student Early Warning &amp; <em style="font-style:italic;color:var(--blue);">Intervention System</em>
+  </h2>
+  <p style="font-size:14px;color:#6b6b6b;margin-top:8px;max-width:600px;">
+    Identifies at-risk students using attendance, behavior, course performance, and test score data. Click a risk tier to filter, then click a student to view their full profile.
+  </p>
+</div>
+
+<!-- Summary cards -->
+<div class="ewi-summary" id="ewi-summary"></div>
+
+<!-- Filter bar -->
+<div class="ewi-filter-bar">
+  <input class="ewi-search" type="text" id="ewi-search" placeholder="Search by name, school, or counselor…" oninput="renderTable()">
+  <button class="ewi-filter-btn active-all" id="btn-all"  onclick="setFilter('all')">All</button>
+  <button class="ewi-filter-btn" id="btn-high" onclick="setFilter('high')">High Risk</button>
+  <button class="ewi-filter-btn" id="btn-mod"  onclick="setFilter('mod')">Moderate</button>
+  <button class="ewi-filter-btn" id="btn-low"  onclick="setFilter('low')">On Track</button>
+</div>
+
+<!-- Student table -->
+<div class="ewi-table-card">
+  <div class="ewi-table-wrap">
+    <table class="ewi-table">
+      <thead>
+        <tr>
+          <th style="text-align:left;" onclick="sortTable('name')">Student</th>
+          <th style="text-align:left;" onclick="sortTable('school')">School</th>
+          <th style="text-align:left;" onclick="sortTable('grade')">Grade Level</th>
+          <th style="text-align:left;" onclick="sortTable('overall')">Risk Level</th>
+          <th style="text-align:left;" onclick="sortTable('score')">Score</th>
+          <th style="text-align:left;" onclick="sortTable('ewi.attendance_pct')">Attendance</th>
+          <th style="text-align:left;" onclick="sortTable('ewi.referrals')">Referrals</th>
+          <th style="text-align:left;" onclick="sortTable('ewi.gpa')">GPA</th>
+          <th style="text-align:left;">Counselor</th>
+        </tr>
+      </thead>
+      <tbody id="ewi-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let ewData = null;
+let activeFilter = 'all';
+let sortCol = 'overall';
+let sortDir = 1;
+let radarChart = null;
+let histChart  = null;
+
+const RC = {
+  high: '#F2424A', mod: '#f7a0a4', low: '#024D8C',
+  blue: '#024D8C', red: '#F2424A', gray: '#d6d6d6',
+  text: '#1a1a1a', mid: '#6b6b6b'
+};
+const RISK_ORDER = { high: 0, mod: 1, low: 2 };
+
+function riskColor(r) { return RC[r] || RC.gray; }
+function riskLabel(r) {
+  return { high: 'High risk', mod: 'Moderate', low: 'On track' }[r] || r;
+}
+function riskClass(r) { return { high: 'rb-high', mod: 'rb-mod', low: 'rb-low' }[r] || ''; }
+function flagClass(r) { return { high: 'fh', mod: 'fm', low: 'fl' }[r] || 'fi'; }
+function domScore(r)  { return { high: 20, mod: 55, low: 90 }[r] || 0; }
+
+function riskBadge(r) {
+  return `<span class="risk-badge ${riskClass(r)}"><span class="rb-dot"></span>${riskLabel(r)}</span>`;
+}
+
+// ── Load data ──────────────────────────────────────────────────────────────
+async function loadData() {
+  const resp = await fetch('/api/ewi');
+  const raw  = await resp.text();
+  ewData = JSON.parse(raw.replace(/\bNaN\b/g, 'null'));
+  renderSummary();
+  renderTable();
+}
+
+// ── Summary cards ──────────────────────────────────────────────────────────
+function renderSummary() {
+  const s = ewData.summary;
+  const total = s.high + s.mod + s.low;
+  document.getElementById('ewi-summary').innerHTML = `
+    <div class="ewi-summary-card ewi-card-high" onclick="setFilter('high')">
+      <div class="ewi-card-count">${s.high}</div>
+      <div class="ewi-card-label">High Risk</div>
+      <div class="ewi-card-desc">Act now — multiple domains flagged</div>
+      <div class="ewi-card-bar"></div>
+    </div>
+    <div class="ewi-summary-card ewi-card-mod" onclick="setFilter('mod')">
+      <div class="ewi-card-count">${s.mod}</div>
+      <div class="ewi-card-label">Moderate Risk</div>
+      <div class="ewi-card-desc">Monitor closely — early intervention recommended</div>
+      <div class="ewi-card-bar"></div>
+    </div>
+    <div class="ewi-summary-card ewi-card-low" onclick="setFilter('low')">
+      <div class="ewi-card-count">${s.low}</div>
+      <div class="ewi-card-label">On Track</div>
+      <div class="ewi-card-desc">All domains within acceptable range</div>
+      <div class="ewi-card-bar"></div>
+    </div>`;
+}
+
+// ── Filter ─────────────────────────────────────────────────────────────────
+function setFilter(f) {
+  activeFilter = f;
+  ['all','high','mod','low'].forEach(k => {
+    const btn = document.getElementById('btn-' + k);
+    btn.className = 'ewi-filter-btn' + (k === f ? ` active-${k}` : '');
+  });
+  renderTable();
+}
+
+// ── Sort ───────────────────────────────────────────────────────────────────
+function sortTable(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  renderTable();
+}
+
+function getVal(s, col) {
+  if (col.startsWith('ewi.')) return s.ewi[col.slice(4)];
+  return s[col];
+}
+
+// ── Table ──────────────────────────────────────────────────────────────────
+function renderTable() {
+  if (!ewData) return;
+  const q = (document.getElementById('ewi-search').value || '').toLowerCase();
+  let rows = ewData.students.filter(s => {
+    if (activeFilter !== 'all' && s.overall !== activeFilter) return false;
+    if (q) {
+      const hay = (s.name + s.school + s.counselor).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    let va = getVal(a, sortCol), vb = getVal(b, sortCol);
+    if (sortCol === 'overall') { va = RISK_ORDER[va]; vb = RISK_ORDER[vb]; }
+    if (va == null) return 1; if (vb == null) return -1;
+    return sortDir * (typeof va === 'string' ? va.localeCompare(vb) : va - vb);
+  });
+
+  // Update sort indicators
+  document.querySelectorAll('.ewi-table thead th').forEach(th => {
+    th.classList.remove('sorted-asc','sorted-desc');
+  });
+
+  const tbody = document.getElementById('ewi-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="9" class="ewi-empty">No students match your filter.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(s => {
+    const pct = s.ewi.attendance_pct != null ? s.ewi.attendance_pct.toFixed(1) + '%' : '—';
+    const fillColor = riskColor(s.overall);
+    const scorePct = s.score;
+    return `<tr onclick="openProfile(${s.student_id})">
+      <td style="font-weight:500;">${s.name}</td>
+      <td style="color:#6b6b6b;">${s.school}</td>
+      <td style="text-align:center;">${s.grade}</td>
+      <td>${riskBadge(s.overall)}</td>
+      <td>
+        <div class="score-mini">
+          <div class="score-mini-bar"><div class="score-mini-fill" style="width:${scorePct}%;background:${fillColor};"></div></div>
+          <span style="font-size:12px;font-weight:500;">${scorePct}</span>
+        </div>
+      </td>
+      <td>${pct}</td>
+      <td style="text-align:center;">${s.ewi.referrals}</td>
+      <td>${s.ewi.gpa != null ? s.ewi.gpa.toFixed(1) : '—'}</td>
+      <td style="color:#6b6b6b;">${s.counselor}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Profile modal ──────────────────────────────────────────────────────────
+function openProfile(sid) {
+  const s = ewData.students.find(x => x.student_id === sid);
+  if (!s) return;
+
+  // Header
+  document.getElementById('prof-name').textContent = s.name;
+  document.getElementById('prof-sub').textContent =
+    `Grade ${s.grade} · ${s.school} · ${s.school_year} · Counselor: ${s.counselor}`;
+  document.getElementById('prof-pill').innerHTML = riskBadge(s.overall);
+
+  // Metrics
+  document.getElementById('prof-score').textContent = s.score;
+  document.getElementById('prof-att').textContent = s.ewi.attendance_pct != null ? s.ewi.attendance_pct.toFixed(1) + '%' : '—';
+  document.getElementById('prof-beh').textContent = s.ewi.referrals + ' ref' + (s.ewi.referrals !== 1 ? 's' : '');
+  document.getElementById('prof-gpa').textContent = s.ewi.gpa != null ? s.ewi.gpa.toFixed(1) : '—';
+  document.getElementById('prof-att-pill').innerHTML = riskBadge(s.risks.att);
+  document.getElementById('prof-beh-pill').innerHTML = riskBadge(s.risks.beh);
+  document.getElementById('prof-gpa-pill').innerHTML = riskBadge(s.risks.crs);
+
+  // Domain cards
+  const att = s.ewi.attendance_pct || 0;
+  const refs = s.ewi.referrals || 0;
+  const sus  = s.ewi.suspensions || 0;
+  const gpa  = s.ewi.gpa || 0;
+  const fails= s.ewi.failing_subjects || 0;
+  document.getElementById('prof-domains').innerHTML = `
+    <div class="ewi-domain-card">
+      <div class="ewi-domain-hdr">
+        <span class="ewi-domain-name">Attendance</span>
+        ${riskBadge(s.risks.att)}
+      </div>
+      <div class="ewi-ind-row">
+        <span class="ewi-ind-lbl">Attendance rate</span>
+        <div class="ewi-bar-bg"><div class="ewi-bar-fill" style="width:${att}%;background:${riskColor(s.risks.att)};"></div></div>
+        <span class="ewi-ind-val">${att.toFixed(1)}%</span>
+        <span class="ewi-flag ${flagClass(s.risks.att)}">${att >= 90 ? 'On track' : att >= 85 ? 'Watch' : 'Critical'}</span>
+      </div>
+      <div class="ewi-ind-row">
+        <span class="ewi-ind-lbl">Days absent (est.)</span>
+        <div class="ewi-bar-bg"><div class="ewi-bar-fill" style="width:${Math.min((100-att)*2,100)}%;background:${riskColor(s.risks.att)};"></div></div>
+        <span class="ewi-ind-val">${Math.round((100-att)*1.8)}</span>
+        <span class="ewi-flag fi">of 180</span>
+      </div>
+    </div>
+    <div class="ewi-domain-card">
+      <div class="ewi-domain-hdr">
+        <span class="ewi-domain-name">Behavior</span>
+        ${riskBadge(s.risks.beh)}
+      </div>
+      <div class="ewi-ind-row">
+        <span class="ewi-ind-lbl">Office referrals</span>
+        <div class="ewi-bar-bg"><div class="ewi-bar-fill" style="width:${Math.min(refs*10,100)}%;background:${refs>=3?RC.high:refs>=2?RC.mod:RC.low};"></div></div>
+        <span class="ewi-ind-val">${refs}</span>
+        <span class="ewi-flag ${refs>=3?'fh':refs>=2?'fm':'fl'}">${refs>=3?'High':refs>=2?'Watch':'Clear'}</span>
+      </div>
+      <div class="ewi-ind-row">
+        <span class="ewi-ind-lbl">Suspensions</span>
+        <div class="ewi-bar-bg"><div class="ewi-bar-fill" style="width:${Math.min(sus*25,100)}%;background:${sus>=1?RC.high:RC.low};"></div></div>
+        <span class="ewi-ind-val">${sus}</span>
+        <span class="ewi-flag ${sus>=1?'fh':'fl'}">${sus>=1?'High risk':'Clear'}</span>
+      </div>
+    </div>
+    <div class="ewi-domain-card">
+      <div class="ewi-domain-hdr">
+        <span class="ewi-domain-name">Course Performance</span>
+        ${riskBadge(s.risks.crs)}
+      </div>
+      <div class="ewi-ind-row">
+        <span class="ewi-ind-lbl">GPA</span>
+        <div class="ewi-bar-bg"><div class="ewi-bar-fill" style="width:${Math.round(gpa/4*100)}%;background:${riskColor(s.risks.crs)};"></div></div>
+        <span class="ewi-ind-val">${gpa.toFixed(1)}</span>
+        <span class="ewi-flag ${flagClass(s.risks.crs)}">${gpa<2?'Critical':gpa<2.5?'Watch':'On track'}</span>
+      </div>
+      <div class="ewi-ind-row">
+        <span class="ewi-ind-lbl">Failing subjects</span>
+        <div class="ewi-bar-bg"><div class="ewi-bar-fill" style="width:${Math.min(fails/6*100,100)}%;background:${fails>=2?RC.high:fails>=1?RC.mod:RC.low};"></div></div>
+        <span class="ewi-ind-val">${fails}</span>
+        <span class="ewi-flag ${fails>=2?'fh':fails>=1?'fm':'fl'}">${fails>=2?'High risk':fails>=1?'Watch':'Clear'}</span>
+      </div>
+    </div>`;
+
+  // Test scores
+  const ts = s.ewi.test_scores;
+  let testsHtml = '';
+  if (ts.ela && ts.ela.score) {
+    const ela = ts.ela.score;
+    const elaPct = Math.round((ela-240)/160*100);
+    const elaB = fsaBand(ela);
+    testsHtml += `<div class="ewi-test-cell">
+      <div class="ewi-test-label">ELA / Reading</div>
+      <div class="ewi-test-score">${ela}</div>
+      <div class="ewi-score-row">
+        <div class="ewi-bar-bg" style="height:6px;"><div class="ewi-bar-fill" style="width:${elaPct}%;background:${elaB.color};"></div></div>
+        <span class="ewi-pct-lbl">Scale 240–390</span>
+      </div>
+      <span class="ewi-flag ${elaB.cls}" style="margin-top:4px;display:inline-block;">${elaB.label}</span>
+    </div>`;
+  }
+  if (ts.math && ts.math.score) {
+    const math = ts.math.score;
+    const mathPct = Math.round((math-240)/160*100);
+    const mathB = fsaBand(math);
+    testsHtml += `<div class="ewi-test-cell">
+      <div class="ewi-test-label">Math</div>
+      <div class="ewi-test-score">${math}</div>
+      <div class="ewi-score-row">
+        <div class="ewi-bar-bg" style="height:6px;"><div class="ewi-bar-fill" style="width:${mathPct}%;background:${mathB.color};"></div></div>
+        <span class="ewi-pct-lbl">Scale 240–390</span>
+      </div>
+      <span class="ewi-flag ${mathB.cls}" style="margin-top:4px;display:inline-block;">${mathB.label}</span>
+    </div>`;
+  }
+  if (ts.science && ts.science.score) {
+    const sci = ts.science.score;
+    const sciPct = Math.round((sci-100)/100*100);
+    const sciB = sciBand(sci);
+    testsHtml += `<div class="ewi-test-cell">
+      <div class="ewi-test-label">Science</div>
+      <div class="ewi-test-score">${Math.round(sci)}</div>
+      <div class="ewi-score-row">
+        <div class="ewi-bar-bg" style="height:6px;"><div class="ewi-bar-fill" style="width:${sciPct}%;background:${sciB.color};"></div></div>
+        <span class="ewi-pct-lbl">Scale 100–200</span>
+      </div>
+      <span class="ewi-flag ${sciB.cls}" style="margin-top:4px;display:inline-block;">${sciB.label}</span>
+    </div>`;
+  }
+  if (ts.writing && ts.writing.score) {
+    const wri = ts.writing.score;
+    const wriPct = Math.round(wri/6*100);
+    const wriB = wriBand(wri);
+    testsHtml += `<div class="ewi-test-cell">
+      <div class="ewi-test-label">Writing</div>
+      <div class="ewi-test-score">${wri.toFixed(1)}</div>
+      <div class="ewi-score-row">
+        <div class="ewi-bar-bg" style="height:6px;"><div class="ewi-bar-fill" style="width:${wriPct}%;background:${wriB.color};"></div></div>
+        <span class="ewi-pct-lbl">Scale 0–6</span>
+      </div>
+      <span class="ewi-flag ${wriB.cls}" style="margin-top:4px;display:inline-block;">${wriB.label}</span>
+    </div>`;
+  }
+  const testsSection = document.getElementById('prof-tests-section');
+  testsSection.style.display = testsHtml ? '' : 'none';
+  document.getElementById('prof-tests').innerHTML = testsHtml;
+
+  // Score history chart
+  const hist = s.ewi.score_history;
+  const histSection = document.getElementById('prof-hist-section');
+  if (hist && hist.labels && hist.labels.length > 1) {
+    histSection.style.display = '';
+    if (histChart) { histChart.destroy(); histChart = null; }
+    histChart = new Chart(document.getElementById('prof-hist'), {
+      type: 'line',
+      data: {
+        labels: hist.labels,
+        datasets: [
+          { label:'ELA', data: hist.ela, borderColor: RC.blue, backgroundColor:'rgba(2,77,140,0.07)', tension:0.35, pointRadius:4, pointBackgroundColor:RC.blue, fill:true },
+          { label:'Math', data: hist.math, borderColor: RC.low, backgroundColor:'rgba(34,197,94,0.07)', tension:0.35, pointRadius:4, pointBackgroundColor:RC.low, borderDash:[5,3], fill:true }
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins: { legend:{display:false} },
+        scales: {
+          y: { min:255, max:390, ticks:{font:{size:10},callback:v=>v}, grid:{color:'rgba(0,0,0,0.05)'} },
+          x: { ticks:{font:{size:11}}, grid:{display:false} }
+        }
+      }
+    });
+    // Draw proficiency line
+    const origDraw = histChart.draw.bind(histChart);
+    histChart.draw = function() {
+      origDraw();
+      const ctx = document.getElementById('prof-hist').getContext('2d');
+      const y = this.scales.y.getPixelForValue(297);
+      ctx.save(); ctx.setLineDash([4,3]);
+      ctx.strokeStyle = RC.high; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(this.chartArea.left, y);
+      ctx.lineTo(this.chartArea.right, y);
+      ctx.stroke(); ctx.restore();
+    };
+    histChart.draw();
+  } else {
+    histSection.style.display = 'none';
+  }
+
+  // Radar chart
+  if (radarChart) { radarChart.destroy(); radarChart = null; }
+  const overallColor = riskColor(s.overall);
+  radarChart = new Chart(document.getElementById('prof-radar'), {
+    type: 'radar',
+    data: {
+      labels: ['Attend.','Behav.','Course','Ach.'],
+      datasets: [{
+        label:'Domain score',
+        data: [domScore(s.risks.att), domScore(s.risks.beh), domScore(s.risks.crs), domScore(s.risks.ach)],
+        backgroundColor: overallColor + '26',
+        borderColor: overallColor,
+        borderWidth: 2,
+        pointBackgroundColor: overallColor,
+        pointRadius: 4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{min:0,max:100,ticks:{stepSize:25,font:{size:9},backdropColor:'transparent',color:'#888'},grid:{color:'rgba(0,0,0,0.08)'},angleLines:{color:'rgba(0,0,0,0.08)'},pointLabels:{font:{size:10},color:'#5f5e5a'}}}
+    }
+  });
+
+  // Alerts
+  const alerts = buildAlerts(s);
+  document.getElementById('prof-alerts').innerHTML = alerts.map(a => `
+    <div class="ewi-alert ewi-alert-${a.l}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        ${a.l==='high'?'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>':'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>'}
+      </svg>
+      <span>${a.msg}</span>
+    </div>`).join('');
+
+  document.getElementById('ewi-modal').classList.add('open');
+}
+
+function closeProfile() {
+  document.getElementById('ewi-modal').classList.remove('open');
+}
+
+// Close on overlay click
+document.getElementById('ewi-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeProfile();
+});
+
+// ── Band helpers ───────────────────────────────────────────────────────────
+function fsaBand(s) {
+  if (s >= 321) return { label:'Advanced',   cls:'fl', color:RC.low };
+  if (s >= 297) return { label:'Proficient', cls:'fm', color:RC.mod };
+  if (s >= 285) return { label:'Basic',      cls:'fh', color:'#f7a0a4' };
+  return               { label:'Below basic',cls:'fh', color:RC.high };
+}
+function sciBand(s) {
+  if (s >= 175) return { label:'Advanced',   cls:'fl', color:RC.low };
+  if (s >= 150) return { label:'Proficient', cls:'fm', color:RC.mod };
+  if (s >= 130) return { label:'Basic',      cls:'fh', color:'#f7a0a4' };
+  return               { label:'Below basic',cls:'fh', color:RC.high };
+}
+function wriBand(w) {
+  if (w >= 4.5) return { label:'Advanced',   cls:'fl', color:RC.low };
+  if (w >= 3.0) return { label:'Proficient', cls:'fm', color:RC.mod };
+  if (w >= 2.0) return { label:'Basic',      cls:'fh', color:'#f7a0a4' };
+  return               { label:'Below basic',cls:'fh', color:RC.high };
+}
+
+// ── Alerts ─────────────────────────────────────────────────────────────────
+function buildAlerts(s) {
+  const alerts = [];
+  const att  = s.ewi.attendance_pct || 0;
+  const refs = s.ewi.referrals || 0;
+  const sus  = s.ewi.suspensions || 0;
+  const gpa  = s.ewi.gpa || 0;
+  const fails= s.ewi.failing_subjects || 0;
+  const ar=s.risks.att, br=s.risks.beh, cr=s.risks.crs;
+  const highN = [ar,br,cr,s.risks.ach].filter(r=>r==='high').length;
+
+  if (highN >= 2) alerts.push({l:'high', msg:`${highN} domains at high risk — convene a student support team meeting immediately.`});
+  if (ar==='high') alerts.push({l:'high', msg:`Attendance ${att.toFixed(1)}% — chronic absence. Contact family and assign attendance mentor.`});
+  else if (ar==='mod') alerts.push({l:'mod', msg:`Attendance ${att.toFixed(1)}% — below 90%. Weekly check-ins recommended.`});
+  if (br==='high') alerts.push({l:'high', msg:`${refs} referral(s) and ${sus} suspension(s). Behavior intervention plan and counseling referral required.`});
+  else if (br==='mod') alerts.push({l:'mod', msg:`2 office referrals on file. Schedule a proactive check-in with teachers.`});
+  if (cr==='high') alerts.push({l:'high', msg:`GPA ${gpa.toFixed(1)} with ${fails} failing subject(s). Academic interventionist referral needed.`});
+  else if (cr==='mod') alerts.push({l:'mod', msg:`GPA ${gpa.toFixed(1)} — approaching 2.5 threshold. Tutoring recommended.`});
+  if (s.overall==='low' && alerts.length===0)
+    alerts.push({l:'low', msg:`All domains within acceptable range. Continue routine monitoring.`});
+  return alerts;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+loadData();
+</script>
+
+</div>
+{% endblock %}

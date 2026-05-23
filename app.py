@@ -1,9 +1,12 @@
 import json
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template
 from services.fl_school_grades_service import get_school_grades_data
+from services.ewi_service import get_ewi_data
 
 app = Flask(__name__)
+
 _school_grades_cache = None
+_ewi_cache = None
 
 @app.route('/')
 @app.route('/projects')
@@ -14,16 +17,9 @@ def projects():
 def florida_school_grades():
     return render_template('projects/florida_school_grades.html', active='projects')
 
-
-@app.route('/api/florida_school_grades')
-def api_florida_school_grades():
-    global _school_grades_cache
-    if _school_grades_cache is None:
-        _school_grades_cache = get_school_grades_data()
-    return app.response_class(
-        response=json.dumps(_school_grades_cache, default=str),
-        mimetype='application/json'
-    )
+@app.route('/projects/early-warning-system')
+def early_warning_system():
+    return render_template('projects/early_warning_system.html', active='projects')
 
 @app.route('/services')
 def services():
@@ -37,8 +33,29 @@ def expertise():
 def contact():
     return render_template('contact.html', active='contact')
 
+@app.route('/api/florida_school_grades')
+def api_florida_school_grades():
+    global _school_grades_cache
+    if _school_grades_cache is None:
+        _school_grades_cache = get_school_grades_data()
+    return app.response_class(
+        response=json.dumps(_school_grades_cache, default=str),
+        mimetype='application/json'
+    )
+
+@app.route('/api/ewi')
+def api_ewi():
+    global _ewi_cache
+    if _ewi_cache is None:
+        _ewi_cache = get_ewi_data()
+    return app.response_class(
+        response=json.dumps(_ewi_cache, default=str),
+        mimetype='application/json'
+    )
+
 with app.app_context():
     _school_grades_cache = get_school_grades_data()
+    _ewi_cache = get_ewi_data()
 
 if __name__ == '__main__':
     app.run(debug=True)
