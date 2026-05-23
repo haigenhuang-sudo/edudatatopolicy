@@ -485,7 +485,7 @@ function renderTable() {
     const fillColor = riskColor(s.overall);
     const scorePct = s.score;
     return `<tr onclick="openProfile(${s.student_id})">
-      <td style="font-weight:500;">${s.name}</td>
+      <td>${s.name}</td>
       <td style="color:#6b6b6b;">${s.school}</td>
       <td style="text-align:center;">${s.grade}</td>
       <td>${riskBadge(s.overall)}</td>
