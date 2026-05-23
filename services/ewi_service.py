@@ -141,3 +141,5 @@ def get_ewi_data() -> dict[str, Any]:
 def get_student_by_id(student_id: int) -> dict | None:
     data = get_ewi_data()
     return next((s for s in data["students"] if s["student_id"] == student_id), None)
+
+print(f"EWI loading from: {DATA_PATH}")

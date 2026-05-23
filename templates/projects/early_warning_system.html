@@ -88,7 +88,7 @@
 .ewi-table thead th.sorted-asc::after  { content: " ↑"; color: #024D8C; }
 .ewi-table thead th.sorted-desc::after { content: " ↓"; color: #024D8C; }
 .ewi-table tbody tr {
-  border-bottom: 1px solid #f0f0f0; cursor: pointer;
+  border-bottom: 1px solid #d6d6d6; cursor: pointer;
   transition: background 0.1s;
 }
 .ewi-table tbody tr:hover { background: #f3f7fa; }
@@ -115,7 +115,7 @@
 }
 .score-mini-bar {
   width: 60px; height: 6px; border-radius: 3px;
-  background: #ebebeb; overflow: hidden; flex-shrink: 0;
+  background: #d6d6d6; overflow: hidden; flex-shrink: 0;
 }
 .score-mini-fill { height: 100%; border-radius: 3px; }
 
@@ -139,7 +139,7 @@
   display: flex; align-items: flex-start;
   justify-content: space-between; gap: 12px;
   padding: 24px 28px 20px; flex-wrap: wrap;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #d6d6d6;
 }
 .ewi-profile-name { font-size: 20px; font-weight: 500; color: #1a1a1a; }
 .ewi-profile-sub  { font-size: 12px; color: #6b6b6b; margin-top: 4px; }
@@ -152,8 +152,8 @@
 /* ── Profile metric grid ── */
 .ewi-metric-grid {
   display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1px; background: #f0f0f0;
-  border-bottom: 1px solid #f0f0f0;
+  gap: 1px; background: #d6d6d6;
+  border-bottom: 1px solid #d6d6d6;
 }
 .ewi-metric {
   background: #fff; padding: 16px 20px; text-align: center;
@@ -174,8 +174,8 @@
 
 .ewi-domain-cards { display: flex; flex-direction: column; gap: 8px; }
 .ewi-domain-card {
-  background: #f9fafb; border-radius: 6px;
-  padding: 12px 16px; border: 1px solid #e8e8e8;
+  background: #f3f7fa; border-radius: 6px;
+  padding: 12px 16px; border: 1px solid #d6d6d6;
 }
 .ewi-domain-hdr {
   display: flex; align-items: center;
@@ -186,12 +186,12 @@
 /* ── Indicator rows ── */
 .ewi-ind-row {
   display: flex; align-items: center; gap: 8px;
-  padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding: 5px 0; border-bottom: 1px solid #f0f0f0;
 }
 .ewi-ind-row:last-of-type { border-bottom: none; }
 .ewi-ind-lbl { font-size: 11px; color: #6b6b6b; min-width: 150px; flex-shrink: 0; }
 .ewi-ind-val { font-size: 11px; font-weight: 500; min-width: 40px; text-align: right; flex-shrink: 0; }
-.ewi-bar-bg  { flex: 1; height: 6px; border-radius: 3px; background: #ebebeb; overflow: hidden; min-width: 0; }
+.ewi-bar-bg  { flex: 1; height: 6px; border-radius: 3px; background: #d6d6d6; overflow: hidden; min-width: 0; }
 .ewi-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
 
 /* ── Flag chips ── */
@@ -209,8 +209,8 @@
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0;
 }
 .ewi-test-cell {
-  background: #f9fafb; border-radius: 6px; padding: 12px 14px;
-  border: 1px solid #e8e8e8;
+  background: #f3f7fa; border-radius: 6px; padding: 12px 14px;
+  border: 1px solid #d6d6d6;
 }
 .ewi-test-label { font-size: 10px; font-weight: 600; color: #6b6b6b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
 .ewi-test-score { font-size: 22px; font-weight: 300; color: #1a1a1a; margin-bottom: 4px; }
@@ -229,7 +229,7 @@
 .ewi-alert svg { flex-shrink: 0; margin-top: 1px; }
 .ewi-alert-high { background: #fce0e1; border: 1px solid #f7a0a4; color: #1a1a1a; }
 .ewi-alert-mod  { background: #fef2f2; border: 1px solid #f7a0a4; color: #1a1a1a; }
-.ewi-alert-low  { background: #b3cde8; border: 1px solid #4a86c8; color: #1a1a1a; }
+.ewi-alert-low  { background: #b3cde8; border: 1px solid #024D8C; color: #1a1a1a; }
 
 /* ── Empty state ── */
 .ewi-empty {
@@ -308,8 +308,8 @@
         <div class="ewi-hist-wrap"><canvas id="prof-hist"></canvas></div>
         <div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:#6b6b6b;">
           <span><span style="display:inline-block;width:16px;height:2px;background:#024D8C;vertical-align:middle;margin-right:4px;"></span>ELA</span>
-          <span><span style="display:inline-block;width:16px;height:2px;background:#22c55e;border-top:2px dashed #22c55e;vertical-align:middle;margin-right:4px;"></span>Math</span>
-          <span><span style="display:inline-block;width:16px;height:2px;border-top:2px dashed #ef4444;vertical-align:middle;margin-right:4px;"></span>Proficiency (297)</span>
+          <span><span style="display:inline-block;width:16px;height:2px;background:#4a86c8;border-top:2px dashed #4a86c8;vertical-align:middle;margin-right:4px;"></span>Math</span>
+          <span><span style="display:inline-block;width:16px;height:2px;border-top:2px dashed #F2424A;vertical-align:middle;margin-right:4px;"></span>Proficiency (297)</span>
         </div>
       </div>
 
@@ -659,15 +659,15 @@ function openProfile(sid) {
       data: {
         labels: hist.labels,
         datasets: [
-          { label:'ELA', data: hist.ela, borderColor: RC.blue, backgroundColor:'rgba(2,77,140,0.07)', tension:0.35, pointRadius:4, pointBackgroundColor:RC.blue, fill:true },
-          { label:'Math', data: hist.math, borderColor: RC.low, backgroundColor:'rgba(34,197,94,0.07)', tension:0.35, pointRadius:4, pointBackgroundColor:RC.low, borderDash:[5,3], fill:true }
+          { label:'ELA', data: hist.ela, borderColor: RC.blue, tension:0.35, pointRadius:4, pointBackgroundColor:RC.blue, fill:false },
+          { label:'Math', data: hist.math, borderColor: '#4a86c8', tension:0.35, pointRadius:4, pointBackgroundColor:'#4a86c8', borderDash:[5,3], fill:false }
         ]
       },
       options: {
         responsive:true, maintainAspectRatio:false,
         plugins: { legend:{display:false} },
         scales: {
-          y: { min:255, max:390, ticks:{font:{size:10},callback:v=>v}, grid:{color:'rgba(0,0,0,0.05)'} },
+          y: { ticks:{font:{size:10},callback:v=>v}, grid:{color:'rgba(0,0,0,0.05)'} },
           x: { ticks:{font:{size:11}}, grid:{display:false} }
         }
       }
@@ -740,19 +740,19 @@ document.getElementById('ewi-modal').addEventListener('click', function(e) {
 // ── Band helpers ───────────────────────────────────────────────────────────
 function fsaBand(s) {
   if (s >= 321) return { label:'Advanced',   cls:'fl', color:RC.low };
-  if (s >= 297) return { label:'Proficient', cls:'fm', color:RC.mod };
+  if (s >= 297) return { label:'Proficient', cls:'fm', color:'#4a86c8' };
   if (s >= 285) return { label:'Basic',      cls:'fh', color:'#f7a0a4' };
   return               { label:'Below basic',cls:'fh', color:RC.high };
 }
 function sciBand(s) {
   if (s >= 175) return { label:'Advanced',   cls:'fl', color:RC.low };
-  if (s >= 150) return { label:'Proficient', cls:'fm', color:RC.mod };
+  if (s >= 150) return { label:'Proficient', cls:'fm', color:'#4a86c8' };
   if (s >= 130) return { label:'Basic',      cls:'fh', color:'#f7a0a4' };
   return               { label:'Below basic',cls:'fh', color:RC.high };
 }
 function wriBand(w) {
   if (w >= 4.5) return { label:'Advanced',   cls:'fl', color:RC.low };
-  if (w >= 3.0) return { label:'Proficient', cls:'fm', color:RC.mod };
+  if (w >= 3.0) return { label:'Proficient', cls:'fm', color:'#4a86c8' };
   if (w >= 2.0) return { label:'Basic',      cls:'fh', color:'#f7a0a4' };
   return               { label:'Below basic',cls:'fh', color:RC.high };
 }
