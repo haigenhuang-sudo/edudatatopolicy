@@ -29,7 +29,7 @@
     .sg-chip:hover { background: #f5f5f7; }
     .sg-chip.active { background: #f5f5f7; font-weight: 500; }
     .sg-chip .chip-label { color: #6b6b6b; }
-    .sg-chip .chip-val   { color: #1d1d1f; font-weight: 500; display: none; }
+    .sg-chip .chip-val   { color: #1d1d1f; font-weight: 500; display: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
     .sg-chip.active .chip-val   { display: inline; }
     .sg-chip.active .chip-label { display: none; }
     .sg-chip .caret { flex-shrink: 0; transition: transform 0.15s ease; }
@@ -215,7 +215,7 @@
         <svg class="caret" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#aaa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
     <div class="sg-bar-sep"></div>
-    <button class="sg-chip" id="sg-chip-school" onclick="sgToggleDD('sg-dd-school', this)" style="min-width:240px;">
+    <button class="sg-chip" id="sg-chip-school" onclick="sgToggleDD('sg-dd-school', this)" style="min-width:240px; max-width:320px;">
         <span class="chip-label">School / District</span>
         <span class="chip-val" id="sg-val-school"></span>
         <svg class="caret" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#aaa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -937,8 +937,8 @@ function renderDistrictComparison() {
     allYears.forEach(y => {
         const yrStr = String(y);
         const rank = rankMap[yrStr] ? (rankMap[yrStr][selectedDistStr] || '—') : '—';
-        tableHeaderHtml += `<th style="text-align:center; padding: 6px 14px; border-bottom: 1px solid ${BLUE}; color: ${TEXTGRAY}; font-size:11px; font-weight:700;">${yrStr}</th>`;
-        tableRowHtml += `<td style="text-align:center; padding: 6px 14px; font-weight:600; color: ${TEXTGRAY}; font-size:13px;">${rank}</td>`;
+        tableHeaderHtml += `<th style="text-align:center; padding: 3px 8px; border-bottom: 1px solid ${BLUE}; color: ${TEXTGRAY}; font-size:11px; font-weight:400;">${yrStr}</th>`;
+        tableRowHtml += `<td style="text-align:center; padding: 3px 8px; font-weight:400; color: ${TEXTGRAY}; font-size:12px;">${rank}</td>`;
     });
 
     const chartCardEl = document.getElementById('sg-district-comparison').parentElement;
@@ -947,7 +947,7 @@ function renderDistrictComparison() {
     if (!miniTableContainer) {
         miniTableContainer = document.createElement('div');
         miniTableContainer.className = 'mini-rank-table-wrap';
-        miniTableContainer.style.cssText = 'display:flex; justify-content:center; margin: 10px 0 10px 0; width:100%;';
+        miniTableContainer.style.cssText = 'display:flex; justify-content:center; margin: 4px 0 6px 0; width:100%; padding: 0 16px; box-sizing:border-box;';
         chartCardEl.insertBefore(miniTableContainer, document.getElementById('sg-district-comparison'));
     }
 
