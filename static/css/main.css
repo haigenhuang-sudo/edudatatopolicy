@@ -745,6 +745,9 @@ main { padding-top: var(--nav-h); }
   .hero, .section { padding-left: 20px; padding-right: 20px; }
   .projects-grid { grid-template-columns: 1fr; }
   .project-card:nth-child(n) { grid-column: span 1; }
+  .stat-num {
+    font-size: clamp(24px, 6vw, 48px);
+   }
   .stats-strip { padding: 40px 20px; }
   .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 24px; }
   .site-footer { padding: 40px 20px 24px; }

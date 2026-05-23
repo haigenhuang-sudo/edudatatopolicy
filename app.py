@@ -9,6 +9,11 @@ _school_grades_cache = None
 _ewi_cache = None
 
 @app.route('/')
+
+@app.route('/about')
+def about():
+    return render_template('about.html', active='about')
+
 @app.route('/projects')
 def projects():
     return render_template('projects.html', active='projects')
