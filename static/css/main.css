@@ -738,6 +738,8 @@ main { padding-top: var(--nav-h); }
   .footer-copy { text-align: center; }
   .service-item { grid-template-columns: 40px 1fr; }
   .service-tag { display: none; }
+  .about-mission-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .about-team-grid { grid-template-columns: 1fr !important; }
 }
 
 @media (max-width: 600px) {
