@@ -919,44 +919,31 @@ function renderDistrictComparison() {
     // Label for selected district at last year
     const lastYear = allYears[allYears.length - 1];
     const selRank  = rankMap[String(lastYear)]?.[String(selectedDist)];
-    const annotations = selRank != null ? [{
-        x: lastYear, y: selRank,
-        xref: 'x', yref: 'y',
-        text: `<b>${districtNames[String(selectedDist)] || ''}</b>`,
-        showarrow: false, xanchor: 'left', xshift: 10,
-        font: { size: 12, color: BLUE, family: FONT }
-    }] : [];
-
-    // Build Top Summary Table Object (Centered right under Title)
-    const selectedDistStr = String(selectedDist);
-    const currentDistrictName = districtNames[selectedDistStr] || '';
-
-    let tableHeaderHtml = `<th style="text-align:left; padding: 6px 14px; border-bottom: 1px solid ${BLUE}; color: ${TEXTGRAY}; font-size:11px; font-weight:500;">Year</th>`;
-    let tableRowHtml = `<td style="text-align:left; padding: 4px 8px; font-weight:500; color: ${BLUE}; font-size:11px;">${currentDistrictName}</td>`;
-
-    allYears.forEach(y => {
-        const yrStr = String(y);
-        const rank = rankMap[yrStr] ? (rankMap[yrStr][selectedDistStr] || '—') : '—';
-        tableHeaderHtml += `<th style="text-align:center; padding: 3px 8px; border-bottom: 1px solid ${BLUE}; color: ${TEXTGRAY}; font-size:11px; font-weight:400;">${yrStr}</th>`;
-        tableRowHtml += `<td style="text-align:center; padding: 3px 8px; font-weight:400; color: ${TEXTGRAY}; font-size:12px;">${rank}</td>`;
-    });
-
-    const chartCardEl = document.getElementById('sg-district-comparison').parentElement;
-    let miniTableContainer = chartCardEl.querySelector('.mini-rank-table-wrap');
-
-    if (!miniTableContainer) {
-        miniTableContainer = document.createElement('div');
-        miniTableContainer.className = 'mini-rank-table-wrap';
-        miniTableContainer.style.cssText = 'display:flex; justify-content:center; margin: 4px 0 6px 0; width:100%; padding: 0 16px; box-sizing:border-box;';
-        chartCardEl.insertBefore(miniTableContainer, document.getElementById('sg-district-comparison'));
-    }
-
-    miniTableContainer.innerHTML = `
-        <table style="border-collapse:collapse; font-family:${FONT}; background:#f9fbfd; border:1px solid #e2e2e2; border-radius:6px; min-width:320px;">
-            <thead><tr>${tableHeaderHtml}</tr></thead>
-            <tbody><tr>${tableRowHtml}</tr></tbody>
-        </table>
-    `;
+    const annotations = [];
+        allYears.forEach(y => {
+            const yr = String(y);
+            const rank = rankMap[yr]?.[String(selectedDist)];
+            if (rank != null) {
+                annotations.push({
+                    x: y, y: rank,
+                    xref: 'x', yref: 'y',
+                    text: `${rank}`,
+                    showarrow: false,
+                    xanchor: 'center', yanchor: 'bottom',
+                    yshift: 8,
+                    font: { size: 10, color: BLUE, family: FONT }
+                });
+            }
+        });
+        if (selRank != null) {
+            annotations.push({
+                x: lastYear, y: selRank,
+                xref: 'x', yref: 'y',
+                text: `<b>${districtNames[String(selectedDist)] || ''}</b>`,
+                showarrow: false, xanchor: 'left', xshift: 12,
+                font: { size: 12, color: BLUE, family: FONT }
+            });
+        }
 
     // Render Plotly Engine
     Plotly.react('sg-district-comparison', traces, {
