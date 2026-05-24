@@ -10,13 +10,13 @@ _ewi_cache = None
 
 @app.route('/')
 
-@app.route('/about')
-def about():
-    return render_template('about.html', active='about')
-
 @app.route('/projects')
 def projects():
     return render_template('projects.html', active='projects')
+
+@app.route('/about')
+def about():
+    return render_template('about.html', active='about')
 
 @app.route('/projects/florida-school-grades')
 def florida_school_grades():
