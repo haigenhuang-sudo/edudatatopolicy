@@ -227,6 +227,13 @@ main { padding-top: var(--nav-h); }
   margin-bottom: 40px;
 }
 
+.hero-btns {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .btn-primary {
   display: inline-block;
   padding: 12px 32px;
@@ -748,6 +755,17 @@ main { padding-top: var(--nav-h); }
   .hero, .section { padding-left: 20px; padding-right: 20px; }
   .projects-grid { grid-template-columns: 1fr; }
   .project-card:nth-child(n) { grid-column: span 1; }
+  .hero-btns {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .hero-btns .btn-primary,
+    .hero-btns .btn-outline {
+      width: 200px;
+      text-align: center;
+      margin-left: 0;
+      box-sizing: border-box;
+    }
   .stat-num {
     font-size: clamp(24px, 6vw, 48px);
    }
