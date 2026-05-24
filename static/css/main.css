@@ -236,7 +236,7 @@ main { padding-top: var(--nav-h); }
 
 .btn-primary {
   display: inline-block;
-  padding: 12px 32px;
+  padding: 9px 22px;
   background: var(--blue);
   color: var(--white);
   text-decoration: none;
@@ -251,7 +251,7 @@ main { padding-top: var(--nav-h); }
 
 .btn-outline {
   display: inline-block;
-  padding: 12px 32px;
+  padding: 9px 22px;
   border: 1.5px solid var(--gray-4);
   color: var(--gray-1);
   text-decoration: none;
