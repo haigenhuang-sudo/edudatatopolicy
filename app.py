@@ -58,6 +58,10 @@ def api_ewi():
         mimetype='application/json'
     )
 
+@app.route('/apple-touch-icon.png')
+def apple_touch_icon():
+    return app.send_static_file('images/logo.png')
+
 with app.app_context():
     _school_grades_cache = get_school_grades_data()
     _ewi_cache = get_ewi_data()
