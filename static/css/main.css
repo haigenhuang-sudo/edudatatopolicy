@@ -447,6 +447,7 @@ main { padding-top: var(--nav-h); }
 .service-detail-card {
   padding: 44px 0;
   border-bottom: 1px solid var(--gray-4);
+  scroll-margin-top: 80px;
 }
 .service-detail-card:last-child { border-bottom: none; }
 
