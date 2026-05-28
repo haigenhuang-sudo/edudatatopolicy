@@ -439,16 +439,14 @@ const ACCEL_METRICS = [
 ];
 
 // ── Utility ────────────────────────────────────────────────────────────────
-const SMALL_WORDS = new Set(['of','to','and','the','a','an','at','by','for','in','on','or','but','nor','so','yet','with','from','into','onto','upon','as','is']);
-
 function toTitleCase(str) {
     if (!str) return '';
-    return str.toLowerCase().split(' ').map((word, i) => {
-        if (i === 0 || !SMALL_WORDS.has(word)) {
-            return word.charAt(0).toUpperCase() + word.slice(1);
-        }
-        return word;
-    }).join(' ');
+    return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function cleanSchoolName(str) {
+    if (!str) return '';
+    return str;
 }
 
 function metricColor(val) {
@@ -628,7 +626,7 @@ function sgBuildSchoolDropdown() {
     schools.forEach(s => {
         const item = document.createElement('div');
         item.className = 'dd-item';
-        const name = toTitleCase(s.schoolName || '');
+        const name = cleanSchoolName(s.schoolName || '');
         item.innerHTML = `<span>${name}</span>${makeCheck()}`;
         item.onclick = () => sgPickSchool(item, s.schoolNumber, name, false);
         dd.appendChild(item);
@@ -728,7 +726,7 @@ function renderGauge() {
     const points     = row.totalPoints;
     const pct        = row.totalPercentage != null ? Math.round(row.totalPercentage) : null;
     const gradeColor = GRADE_COLORS[grade] || '#95a5a6';
-    const maxPts     = points + 150;
+    const maxPts = pct != null && pct > 0 ? Math.round(points / (pct / 100)) : points + 150;
 
     Plotly.react(plotEl, [{
         type: 'indicator', mode: 'gauge', value: points,
@@ -744,7 +742,7 @@ function renderGauge() {
 
     const name = sgState.isDistrict
         ? toTitleCase(row.districtName || '')
-        : toTitleCase(row.schoolName || '');
+        : cleanSchoolName(row.schoolName || '');
     labelEl.innerHTML = `
         <div style="position:absolute;top:70%;left:0;right:0;transform:translateY(-50%);text-align:center;font-family:${FONT};">
             <div style="font-size:48px;font-weight:700;color:${TEXTGRAY};line-height:1;">${grade}</div>
@@ -1075,7 +1073,7 @@ function renderSchoolTable() {
 
     schools.sort((a, b) => {
         if (tableState.sortCol === -1) {
-            return tableState.sortDir * toTitleCase(a).localeCompare(toTitleCase(b));
+            return tableState.sortDir * cleanSchoolName(a).localeCompare(cleanSchoolName(b));
         } else {
             const y = years[tableState.sortCol];
             const nA = GRADE_ORDER[gradeOf(a,y)||''] ?? -1;
@@ -1110,7 +1108,7 @@ function renderSchoolTable() {
             // Find the school record to pass its true ID number
             const sRecord = tableData.find(x => x.schoolName === sName);
             const sNum = sRecord ? sRecord.schoolNumber : '';
-            const cleanLabel = toTitleCase(sName);
+            const cleanLabel = cleanSchoolName(sName);
 
             // Added cursor style and active selection click target pipeline
             return `<tr style="cursor:pointer;" onclick="sgPickSchool(null, '${sNum}', '${cleanLabel}', false)">
@@ -1152,7 +1150,7 @@ function openDrillDown(grade, year) {
     }
 
     body.innerHTML = schoolData.map(r => {
-        let rowHtml = `<tr><td class="school-name-plain">${toTitleCase(r.schoolName)}</td>`;
+        let rowHtml = `<tr><td class="school-name-plain">${cleanSchoolName(r.schoolName)}</td>`;
         visibleMetrics.forEach(m => {
             const val = r[m.key];
             const displayVal = val != null ? Math.round(val)+'%' : '—';
@@ -1246,7 +1244,8 @@ function sgHandleSearch() {
         ).slice(0, 5);
 
         const matchedSchools = (sgData.schools || []).filter(s =>
-            (s.schoolName || '').toLowerCase().includes(q)
+            (s.schoolName || '').toLowerCase().includes(q) &&
+            (sgData.districts || []).some(d => String(d.districtNumber) === String(s.districtNumber))
         ).slice(0, 12);
 
         if (!matchedDists.length && !matchedSchools.length) return;
@@ -1303,7 +1302,7 @@ function sgHandleSearch() {
             matchedSchools.forEach(s => {
                 const item = document.createElement('div');
                 item.className = 'dd-item';
-                item.innerHTML = `<span>${toTitleCase(s.schoolName)}</span><span style="font-size:11px;color:#aaa;margin-left:8px;">${toTitleCase(s.districtName)}</span>`;
+                item.innerHTML = `<span>${cleanSchoolName(s.schoolName)}</span><span style="font-size:11px;color:#aaa;margin-left:8px;">${toTitleCase(s.districtName)}</span>`;
                 item.onclick = () => {
                     document.getElementById('sg-search').value = toTitleCase(s.schoolName);
                     sgDismissSearchDD();
@@ -1314,7 +1313,7 @@ function sgHandleSearch() {
                         sgPickDistrict(null, s.districtNumber, distData.districtName);
                     }
                     setTimeout(() => {
-                        sgPickSchool(null, s.schoolNumber, toTitleCase(s.schoolName), false);
+                        sgPickSchool(null, s.schoolNumber, cleanSchoolName(s.schoolName), false);
                     }, 100);
                 };
                 dd.appendChild(item);
