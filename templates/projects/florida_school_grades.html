@@ -178,7 +178,39 @@
         color: #1a1a1a;
     }
 
-    @media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) {
+        .chart-grid { grid-template-columns: 1fr; }
+        .chart-grid { grid-template-columns: 1fr; }
+        .sg-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 10px 14px;
+        }
+        .sg-bar-sep { display: none; }
+        .sg-chip {
+            min-width: unset !important;
+            width: 100%;
+            overflow: hidden;
+        }
+        .sg-chip .chip-val {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+        #sg-search {
+            width: 100%;
+            border: 1px solid #e2e2e2;
+            border-radius: 6px;
+            padding: 6px 14px;
+            height: 36px;
+        }
+        #sg-search-dd {
+            max-width: calc(100vw - 24px);
+            right: 12px;
+        }
+    }
 
     @media print {
         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -1224,7 +1256,14 @@ function sgHandleSearch() {
 
         const dd = document.createElement('div');
         dd.id = 'sg-search-dd';
-        dd.style.cssText = `position:fixed; z-index:9500; background:#fff; border:1px solid #e0e0e0; border-radius:6px; box-shadow:0 4px 20px rgba(0,0,0,0.09); min-width:280px; max-height:320px; overflow-y:auto; top:${rect.bottom + 4}px; left:${rect.left}px;`;
+        dd.style.cssText = `position:fixed; z-index:9500; background:#fff; border:1px solid #e0e0e0; border-radius:6px; box-shadow:0 4px 20px rgba(0,0,0,0.09); min-width:280px; max-height:320px; overflow-y:auto; top:${rect.bottom + 4}px;`;
+            if (window.innerWidth <= 900) {
+                dd.style.left = Math.max(12, rect.left - 100) + 'px';
+                dd.style.right = '12px';
+            } else {
+                dd.style.left = Math.max(12, rect.left) + 'px';
+                dd.style.right = 'auto';
+            }
 
         if (matchedDists.length) {
             const label = document.createElement('div');
