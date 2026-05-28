@@ -226,6 +226,10 @@
         <span class="chip-val" id="sg-val-year"></span>
         <svg class="caret" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="#aaa" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
+    <div class="sg-bar-sep"></div>
+    <input type="text" id="sg-search" placeholder="Search district or school…"
+      oninput="sgHandleSearch()"
+      style="border:none; outline:none; font-family:'Roboto',sans-serif; font-size:14px; color:#1d1d1f; background:transparent; min-width:200px; padding:6px 8px;">
 </div>
 
 <!-- ROW 1: Gauge + Grade Trend -->
@@ -1183,6 +1187,99 @@ function openRankingDrillDown() {
 
 function closeRankingModal() {
     document.getElementById('sg-ranking-modal').style.display = 'none';
+}
+
+// search box at the filter row
+let sgSearchTimer = null;
+
+function sgHandleSearch() {
+    clearTimeout(sgSearchTimer);
+    sgSearchTimer = setTimeout(() => {
+        const q = document.getElementById('sg-search').value.toLowerCase().trim();
+        sgDismissSearchDD();
+        if (q.length < 2) return;
+
+        const matchedDists = (sgData.districts || []).filter(d =>
+            (d.districtName || '').toLowerCase().includes(q)
+        ).slice(0, 5);
+
+        const matchedSchools = (sgData.schools || []).filter(s =>
+            (s.schoolName || '').toLowerCase().includes(q)
+        ).slice(0, 12);
+
+        if (!matchedDists.length && !matchedSchools.length) return;
+
+        const input = document.getElementById('sg-search');
+        const rect = input.getBoundingClientRect();
+
+        const dd = document.createElement('div');
+        dd.id = 'sg-search-dd';
+        dd.style.cssText = `position:fixed; z-index:9500; background:#fff; border:1px solid #e0e0e0; border-radius:6px; box-shadow:0 4px 20px rgba(0,0,0,0.09); min-width:280px; max-height:320px; overflow-y:auto; top:${rect.bottom + 4}px; left:${rect.left}px;`;
+
+        if (matchedDists.length) {
+            const label = document.createElement('div');
+            label.className = 'dd-group-label';
+            label.textContent = 'Districts';
+            dd.appendChild(label);
+
+            matchedDists.forEach(d => {
+                const item = document.createElement('div');
+                item.className = 'dd-item';
+                item.innerHTML = `<span>${toTitleCase(d.districtName)}</span>`;
+                item.onclick = () => {
+                    document.getElementById('sg-search').value = toTitleCase(d.districtName);
+                    sgDismissSearchDD();
+                    const ddDist = document.getElementById('sg-dd-district');
+                    const items = ddDist.querySelectorAll('.dd-item');
+                    items.forEach(item => {
+                        if (item.querySelector('span').textContent === toTitleCase(d.districtName)) {
+                            sgPickDistrict(item, d.districtNumber, d.districtName);
+                        }
+                    });
+                };
+                dd.appendChild(item);
+            });
+        }
+
+        if (matchedSchools.length) {
+            const sep = document.createElement('div');
+            sep.className = 'dd-sep';
+            dd.appendChild(sep);
+
+            const label = document.createElement('div');
+            label.className = 'dd-group-label';
+            label.textContent = 'Schools';
+            dd.appendChild(label);
+
+            matchedSchools.forEach(s => {
+                const item = document.createElement('div');
+                item.className = 'dd-item';
+                item.innerHTML = `<span>${toTitleCase(s.schoolName)}</span><span style="font-size:11px;color:#aaa;margin-left:8px;">${toTitleCase(s.districtName)}</span>`;
+                item.onclick = () => {
+                    document.getElementById('sg-search').value = toTitleCase(s.schoolName);
+                    sgDismissSearchDD();
+                    const distData = (sgData.districts || []).find(d =>
+                        String(d.districtNumber) === String(s.districtNumber)
+                    );
+                    if (distData) {
+                        sgPickDistrict(null, s.districtNumber, distData.districtName);
+                    }
+                    setTimeout(() => {
+                        sgPickSchool(null, s.schoolNumber, toTitleCase(s.schoolName), false);
+                    }, 100);
+                };
+                dd.appendChild(item);
+            });
+        }
+
+        document.body.appendChild(dd);
+        document.addEventListener('click', sgDismissSearchDD, { once: true });
+    }, 300);
+}
+
+function sgDismissSearchDD() {
+    const dd = document.getElementById('sg-search-dd');
+    if (dd) dd.remove();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────
