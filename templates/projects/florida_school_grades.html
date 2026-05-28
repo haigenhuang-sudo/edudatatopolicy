@@ -67,6 +67,14 @@
     }
     .dd-sep { height: 1px; background: #f0f0f0; margin: 4px 0; }
 
+    #sg-search-dd .dd-item span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 220px;
+    display: block;
+    }
+
     .sg-click-catch { display:none; position:fixed; inset:0; z-index:8000; background:transparent; }
     .sg-click-catch.open { display:block; }
 
@@ -451,11 +459,12 @@ function sgCloseAll() {
 // ── Pick district ──────────────────────────────────────────────────────────
 function sgPickDistrict(el, distNum, distName) {
     document.getElementById('sg-dd-district').querySelectorAll('.dd-item').forEach(i => i.classList.remove('selected'));
-    el.classList.add('selected');
+    if (el) el.classList.add('selected');
     sgState.district = String(distNum);
     document.getElementById('sg-chip-district').classList.add('active');
     document.getElementById('sg-val-district').textContent = toTitleCase(distName);
     sgCloseAll();
+    document.getElementById('sg-search').value = '';
 
     // Reset school selection
     sgState.school = null;
@@ -523,6 +532,7 @@ function sgPickSchool(el, schoolNum, label, isDistrict) {
     // Explicitly shut down the dropdown state tracking before rendering
     chip.classList.remove('dd-open');
     sgCloseAll();
+    document.getElementById('sg-search').value = '';
     renderAllCharts();
 }
 
