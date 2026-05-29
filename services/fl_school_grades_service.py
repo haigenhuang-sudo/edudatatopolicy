@@ -67,8 +67,7 @@ def get_school_grades_data() -> dict[str, Any]:
     # 6. District ranking — all Florida districts, totalPoints, since 2019
     rank_cols = [c for c in ["SchoolYear", "districtNumber", "districtName", "schoolNumber", "totalPoints"] if c in df.columns]
     district_ranking_df = (
-        df[(df["schoolNumber"] == 0) & (df["SchoolYear"] >= 2019) &
-           (~df["districtNumber"].astype(str).str.strip().isin(["0", "00", "0.0"]))][rank_cols]
+        df[(df["schoolNumber"] == 0) & (df["SchoolYear"] >= 2019)][rank_cols]
         .sort_values(["SchoolYear", "districtNumber"], ascending=[False, True])
     )
     district_ranking = district_ranking_df.where(pd.notnull(district_ranking_df), None).to_dict(orient="records")
