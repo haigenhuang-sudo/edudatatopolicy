@@ -330,7 +330,7 @@
 </div>
 
 <!-- ROW 6: Summary table -->
-<div class="sg-table-card" style="margin-bottom:20px;">
+<div class="sg-table-card" id="sg-summary-card" style="margin-bottom:20px;">
     <div class="sg-table-title">District Grade Historical Summary</div>
     <div class="sg-table-wrap" style="max-height:none;">
         <table class="sg-table">
@@ -343,7 +343,7 @@
 </div>
 
 <!-- ROW 7: School history table -->
-<div class="sg-table-card" style="height:800px; display:flex; flex-direction:column;">
+<div class="sg-table-card"  id="sg-history-card" style="height:800px; display:flex; flex-direction:column;">
     <div class="sg-table-title" id="sg-history-title" style="flex-shrink:0;">School Letter Grade History</div>
     <div class="sg-type-bar">
         <button class="sg-type-btn active" data-type="all" onclick="sgSetType(this,'all')">All</button>
@@ -488,6 +488,12 @@ function sgCloseAll() {
     document.getElementById('sgClickCatch').classList.remove('open');
 }
 
+function sgToggleDistrictSections() {
+    const isState = String(sgState.district) === '0';
+    document.getElementById('sg-summary-card').style.display = isState ? 'none' : '';
+    document.getElementById('sg-history-card').style.display = isState ? 'none' : 'flex';
+}
+
 // ── Pick district ──────────────────────────────────────────────────────────
 function sgPickDistrict(el, distNum, distName) {
     document.getElementById('sg-dd-district').querySelectorAll('.dd-item').forEach(i => i.classList.remove('selected'));
@@ -518,6 +524,7 @@ function sgPickDistrict(el, distNum, distName) {
     renderDistrictComparison();
     renderSummaryTable();
     renderSchoolTable();
+    sgToggleDistrictSections();
 }
 
 // ── Default to district average ────────────────────────────────────────────
