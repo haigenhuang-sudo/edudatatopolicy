@@ -443,12 +443,7 @@ const SMALL_WORDS = new Set(['of','to','and','the','a','an','at','by','for','in'
 
 function toTitleCase(str) {
     if (!str) return '';
-    return str.toLowerCase().split(' ').map((word, i) => {
-        if (i === 0 || !SMALL_WORDS.has(word)) {
-            return word.charAt(0).toUpperCase() + word.slice(1);
-        }
-        return word;
-    }).join(' ');
+        return str;
 }
 
 function cleanSchoolName(str) {
@@ -642,8 +637,8 @@ function sgBuildSchoolDropdown() {
 
     const distItem = document.createElement('div');
     distItem.className = 'dd-item';
-    distItem.innerHTML = `<span>${distName} (District)</span>${makeCheck()}`;
-    distItem.onclick = () => sgPickSchool(distItem, sgState.district, distName + ' (District)', true);
+    distItem.innerHTML = `<span>${distName === 'State of Florida' ? distName : distName + '(District)'}</span>${makeCheck()}`;
+    distItem.onclick = () => sgPickSchool(distItem, sgState.district, distName === 'State of Florida' ? distName: distName + ' (District)', true);
     dd.appendChild(distItem);
 
     const sep = document.createElement('div');

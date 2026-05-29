@@ -58,7 +58,7 @@ def api_ewi():
         mimetype='application/json'
     )
 
-with app.app_context():
+ with app.app_context():
     _school_grades_cache = get_school_grades_data()
     _ewi_cache = get_ewi_data()
 
