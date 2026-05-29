@@ -27,9 +27,6 @@ def get_school_grades_data() -> dict[str, Any]:
     if "schoolgrade" in df.columns:
         df = df[df["schoolgrade"] != "I"]
     detail_cols = [c for c in DETAIL_COLS if c in df.columns]
-    if "districtNumber" in df.columns:
-        # Filters out string versions '00' or '0' as well as numeric 0
-        df = df[~df["districtNumber"].astype(str).str.strip().isin(["00", "0", "0.0"])]
 
     # 1. Distinct years (most-recent first)
     years = sorted(df["SchoolYear"].dropna().unique().tolist(), reverse=True)
@@ -43,8 +40,10 @@ def get_school_grades_data() -> dict[str, Any]:
     districts = districts_df.where(pd.notnull(districts_df), None).to_dict(orient="records")
 
     # 3. All schools — all districts, include districtNumber for frontend filtering
+    # 3. All schools — exclude district 0
     schools_df = (
-        df[df["schoolNumber"] != 0][["districtNumber", "districtName", "schoolNumber", "schoolName", "schoolType"]]
+        df[(df["schoolNumber"] != 0) & (~df["districtNumber"].astype(str).str.strip().isin(["00", "0", "0.0"]))][
+            ["districtNumber", "districtName", "schoolNumber", "schoolName", "schoolType"]]
         .drop_duplicates(subset=["districtNumber", "schoolNumber"])
         .sort_values(["districtName", "schoolName"])
     )
