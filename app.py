@@ -1,9 +1,20 @@
 import json
 from flask import Flask, render_template
+from flask_mail import Mail, Message
+from flask import request, redirect, url_for
 from services.fl_school_grades_service import get_school_grades_data
 from services.ewi_service import get_ewi_data
 
 app = Flask(__name__)
+
+# Mail config
+app.config['MAIL_SERVER'] = 'smtp.office365.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'Haigen.Huang@edudatatopolicy.com'
+app.config['MAIL_PASSWORD'] = 'Ilove@jennaindiana15'
+
+mail = Mail(app)
 
 _school_grades_cache = None
 _ewi_cache = None
@@ -34,8 +45,22 @@ def services():
 def expertise():
     return render_template('expertise.html', active='expertise')
 
-@app.route('/contact')
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        organization = request.form.get('organization')
+        service = request.form.get('service')
+        message = request.form.get('message')
+        msg = Message(
+            subject=f'New Contact Form: {name}',
+            sender=app.config['MAIL_USERNAME'],
+            recipients=['contact@edudatatopolicy.com'],
+            body=f"Name: {name}\nEmail: {email}\nOrganization: {organization}\nService: {service}\n\nMessage:\n{message}"
+        )
+        mail.send(msg)
+        return redirect(url_for('contact'))
     return render_template('contact.html', active='contact')
 
 @app.route('/api/florida_school_grades')
@@ -58,9 +83,9 @@ def api_ewi():
         mimetype='application/json'
     )
 
- # with app.app_context():
- #   _school_grades_cache = get_school_grades_data()
- #   _ewi_cache = get_ewi_data()
+  # with app.app_context():
+  #  _school_grades_cache = get_school_grades_data()
+  #  _ewi_cache = get_ewi_data()
 
 if __name__ == '__main__':
     app.run(debug=True)
