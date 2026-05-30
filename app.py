@@ -4,15 +4,18 @@ from flask_mail import Mail, Message
 from flask import request, redirect, url_for
 from services.fl_school_grades_service import get_school_grades_data
 from services.ewi_service import get_ewi_data
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 app = Flask(__name__)
 
 # Mail config
 app.config['MAIL_SERVER'] = 'smtp.office365.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'Haigen.Huang@edudatatopolicy.com'
-app.config['MAIL_PASSWORD'] = 'Ilove@jennaindiana15'
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 
 mail = Mail(app)
 
